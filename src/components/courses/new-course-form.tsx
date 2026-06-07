@@ -1,4 +1,3 @@
-// src/components/courses/new-course-form.tsx
 "use client";
 
 import { useState } from "react";
@@ -23,7 +22,7 @@ export function NewCourseForm() {
         course_type: (formData.get("course_type") as CourseType) || "elective",
         learning_goal: formData.get("learning_goal") as string,
         min_daily_minutes: Number(formData.get("min_daily_minutes")) || 15,
-        color: "#475569", // デフォルトの落ち着いた色 (slate-600)
+        color: "#475569", 
       });
       setIsOpen(false);
     } catch (error) {

@@ -45,7 +45,11 @@ export async function createCourse(formData: {
 
   const { data, error } = await supabase
     .from("courses")
-    .insert({ ...formData, user_id: user.id })
+    .insert({ 
+      ...formData, 
+      user_id: user.id,
+      is_active: true // これがないと一覧に表示されません
+    })
     .select()
     .single();
 
