@@ -191,17 +191,21 @@ CREATE POLICY "Users can update own academic status" ON academic_status
 -- ============================================
 
 CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
-  INSERT INTO profiles (id, email, display_name)
+  INSERT INTO public.profiles (id, email, display_name)
   VALUES (NEW.id, NEW.email, COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)));
 
-  INSERT INTO academic_status (user_id)
+  INSERT INTO public.academic_status (user_id)
   VALUES (NEW.id);
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
@@ -212,9 +216,13 @@ CREATE TRIGGER on_auth_user_created
 -- ============================================
 
 CREATE OR REPLACE FUNCTION seed_default_courses(p_user_id UUID)
-RETURNS VOID AS $$
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
-  INSERT INTO courses (user_id, name, description, course_type, learning_goal, min_daily_minutes, syllabus, color, sort_order)
+  INSERT INTO public.courses (user_id, name, description, course_type, learning_goal, min_daily_minutes, syllabus, color, sort_order)
   VALUES
     (p_user_id, '英語', '留学・国際キャリアに耐える英語力獲得', 'required', 'TOEFL 100点以上を目指す', 35, 'TOEFL単語、シャドーイング、リーディング', '#3b82f6', 1),
     (p_user_id, '中国語', 'ビジネス中国語の基礎習得', 'required', 'HSK4級合格を目指す', 15, '単語、文法、リスニング', '#ef4444', 2),
@@ -222,4 +230,4 @@ BEGIN
     (p_user_id, '欧州政治研究', '欧州政治の構造的理解', 'elective', 'EU政治の基礎理解', 20, 'EU機構、主要国政治、国際関係', '#f59e0b', 4),
     (p_user_id, '数理・論理', '論理的思考力の強化', 'elective', '形式論理と数学的思考', 20, '論理学、集合論、確率', '#10b981', 5);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
